@@ -40,7 +40,7 @@ class Conn extends PDO {
         return self::$instance;
     }
 
-    public function fetchTableData($table, $field = null, $value = null, $operator = "=", $orderby = []) {
+    public function fetchTableData($table, $field = null, $value = null, $operator = "=", $orderby = array()) {
         if ($field === NULL) {
             $sql = "SELECT * FROM $table";
         } else {
@@ -53,7 +53,7 @@ class Conn extends PDO {
             $sql .= " ORDER BY $ord";   
         }
 
-        return $this->getSQLArray($sql, [$value]);
+        return $this->getSQLArray($sql, array($value));
     }
 
     public function fetchTableMeta($table) {
@@ -65,9 +65,9 @@ class Conn extends PDO {
         WHERE TABLE_NAME = ?
         ";
 
-        $array = $this->getSQLArray($sql, [$table]);
+        $array = $this->getSQLArray($sql, array($table));
 
-        $result = [];
+        $result = array();
 
         foreach ($array as $value) {
             $result[$value['COLUMN_NAME']] = $value['DATA_TYPE'];
@@ -86,13 +86,13 @@ class Conn extends PDO {
         AND COLUMN_KEY =  'PRI'
         ";
 
-        $array = $this->getSQLArray($sql, [$table]);
+        $array = $this->getSQLArray($sql, array($table));
 
         return $array[0]["COLUMN_NAME"];
     }
 
-    public function getSQLArray($sql, $param = []) {
-        $result = [];
+    public function getSQLArray($sql, $param = array()) {
+        $result = array();
 
         $stmt = $this->prepare($sql);
 
@@ -105,7 +105,7 @@ class Conn extends PDO {
         return $result;
     }
 
-    public function executeSQL($sql, $param = []) {
+    public function executeSQL($sql, $param = array()) {
         $stmt = $this->prepare($sql);
 
         if (!$stmt->execute($param)) {
@@ -117,7 +117,7 @@ class Conn extends PDO {
         return true;
     }
 
-    public function runInsert($sql, $param = []) {
+    public function runInsert($sql, $param = array()) {
         $result = false;
 
         $this->beginTransaction();
