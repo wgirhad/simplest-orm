@@ -40,20 +40,62 @@ class Conn extends PDO {
         return self::$instance;
     }
 
-    public function fetchTableData($table, $field = null, $value = null, $operator = "=", $orderby = array()) {
-        if ($field === NULL) {
-            $sql = "SELECT * FROM $table";
+    public function fetchTableData($table, $field = null, $value = null, $operator = "=", $orderby = array(), $invert = false, $limit = false, $fields = "*") {
+        $where = array();
+        if ($value !== null && $field !== '') {
+            if ($invert) {
+                $where[0]['query'] = "? $operator $field";
+            } else {
+                $where[0]['query'] = "$field $operator ?";
+            }
+            $where[0]['param'] = $value;
+        }
+        return $this->fetchTableDataF($tabela, $where, $orderby, $limit, $fields);
+    }
+
+    public function fetchTableDataF($table, $filter = array(), $orderby = array(), $limit = false, $fields = "*") {
+        $param = [];
+        $where = [];
+
+        foreach ($filter as $key => $value) {
+            array_push($param, $value['param']);
+            array_push($where, $value['query']);
+        }
+
+        $where = implode(" AND ", $where);
+        if (strlen(trim($where)) > 0) $where = "WHERE $where";
+        
+
+        if ($limit !== false) {
+            $limit = (int) $limit;
+            $limit = "LIMIT $limit";
+        }
+
+        if (is_array($orderby)) {
+            $orderby = implode(', ', array_filter($orderby));
+            if (strlen(trim($orderby)) > 0) {
+                $orderby = "ORDER BY $orderby";
+            }
         } else {
-            $sql = "SELECT * FROM $table WHERE $field $operator ?";
+            $orderby = '';
         }
 
-        if (count($orderby) > 0) {
-            $ord = implode(", ", $orderby);
-            
-            $sql .= " ORDER BY $ord";   
+        $sql = "SELECT $fields FROM $table $where $orderby $limit";
+
+        return $this->getSQLArray($sql, $param);
+    }
+
+    public function assembleFilter($values, $operator = "=") {
+        $result = array();
+
+        foreach ($values as $key => $value) {
+            array_push($result, array(
+                "query" => "$key $operator ?",
+                "param" => $value
+            ));
         }
 
-        return $this->getSQLArray($sql, array($value));
+        return $result;
     }
 
     public function fetchTableMeta($table) {
