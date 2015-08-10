@@ -88,9 +88,18 @@ class Conn extends PDO {
     public function assembleFilter($values, $operator = "=") {
         $result = array();
 
+        $isContaining = ($operator == "CONTAINING");
+
         foreach ($values as $key => $value) {
+            if ($isContaining) {
+                $op = "LIKE";
+                $value = "%$value%";
+            } else {
+                $op = $operator;
+            }
+
             array_push($result, array(
-                "query" => "$key $operator ?",
+                "query" => "$key $op ?",
                 "param" => $value
             ));
         }
