@@ -30,6 +30,7 @@ class Conn extends PDO {
     function __construct() {
         include ('database.conf.php');
         parent::__construct($conf['DSN'], $conf['user'], $conf['password']);
+        $this->exec("SET CHARACTER SET utf8");
     }
 
     public static function getInstance() {
