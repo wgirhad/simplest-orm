@@ -69,21 +69,39 @@ class TABLE_RECORD implements Iterator {
 
         $param = $this->assembleInsertQuery();
 
-        return $this->conn->runInsert($param[0], $param[1]);
+        return $this->parseResult($param[0], $param[1], true);
     }
 
     function update() {
         $this->stripInexistentFields();
         $param = $this->assembleUpdateQuery();
         
-        return $this->conn->executeSQL($param[0], $param[1]);
+        return $this->parseResult($param[0], $param[1]);
     }
 
     function delete() {
         $this->stripInexistentFields();
         $param = $this->assembleDeleteQuery();
         
-        return $this->conn->executeSQL($param[0], $param[1]);
+        return $this->parseResult($param[0], $param[1]);
+    }
+
+    protected function parseResult($sql, $param, $insert = false) {
+        $result = array();
+
+        try {
+            if ($insert) {
+                $this->data[$this->primaryKey] = $this->conn->runInsert($sql, $param);
+                $result["status"] = true;
+            } else {
+                $result["status"] = $this->conn->executeSQL($sql, $param);
+            }
+        } catch (Exception $e) {
+            $result["status"] = false;
+            $result["error"]  = $e->getMessage();
+        }
+
+        return $result;
     }
 
     protected function assembleDeleteQuery() {
