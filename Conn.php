@@ -28,8 +28,9 @@ class Conn extends PDO {
     private static $instance;
 
     function __construct() {
-        include ('database.conf.php');
-        parent::__construct($conf['DSN'], $conf['user'], $conf['password']);
+        $conf = json_decode(file_get_contents(__DIR__ . '/config.json'), true);
+        $dsn = self::template($conf['DSN'], $conf);
+        parent::__construct($dsn, $conf['user'], $conf['password']);
         $this->exec("SET CHARACTER SET utf8");
     }
 
@@ -39,6 +40,14 @@ class Conn extends PDO {
         }
 
         return self::$instance;
+    }
+
+    protected static function template($str, $arr) {
+        foreach ($arr as $key => $value) {
+            $str = str_replace('{{' . $key . '}}', $value, $str);
+        }
+
+        return $str;
     }
 
     public function fetchTableData($table, $field = null, $value = null, $operator = "=", $orderby = array(), $invert = false, $limit = false, $fields = "*") {
@@ -51,7 +60,7 @@ class Conn extends PDO {
             }
             $where[0]['param'] = $value;
         }
-        return $this->fetchTableDataF($tabela, $where, $orderby, $limit, $fields);
+        return $this->fetchTableDataF($table, $where, $orderby, $limit, $fields);
     }
 
     public function fetchTableDataF($table, $filter = array(), $orderby = array(), $limit = false, $fields = "*") {
