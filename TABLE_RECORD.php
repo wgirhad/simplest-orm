@@ -156,6 +156,46 @@ class TABLE_RECORD implements Iterator {
         $this->data = array_intersect_key($this->data, $this->columns);
     }
 
+    public static function fetch($table, $idValue, $field = "ID") {
+        $result = array();
+
+        $rows = Conn::getInstance()->fetchTableData($table, $field, $idValue);
+
+        foreach ($rows as $row) {
+            array_push($result, new self($table, $row));
+        }
+
+        if (count($result) == 1) {
+            return $result[0];
+        } else {
+            return $result;
+        }
+    }
+
+    public static function fetchList($table, $idList, $field = "ID") {
+        $result = array();
+        $filter = array();
+
+        foreach ($idList as $id) {
+            array_push($filter, array(
+                "query"   => "$field = ?",
+                "param"   => $id
+            ));
+        }
+
+        $rows = Conn::getInstance()->fetchSimpleData($table, array(
+            "andOr"   => "OR",
+            "orderby" => [$field],
+            "filter"  => $filter
+        ));
+
+        foreach ($rows as $row) {
+            array_push($result, new self($table, $row));
+        }
+
+        return $result;
+    }
+
     /**
      * Iterator Methods
      */

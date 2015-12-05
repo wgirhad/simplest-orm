@@ -63,16 +63,16 @@ class Conn extends PDO {
         return $this->fetchTableDataF($table, $where, $orderby, $limit, $fields);
     }
 
-    public function fetchTableDataF($table, $filter = array(), $orderby = array(), $limit = false, $fields = "*") {
-        $param = [];
-        $where = [];
+    public function fetchTableDataF($table, $filter = array(), $orderby = array(), $limit = false, $andOr = "AND", $fields = "*") {
+        $param = array();
+        $where = array();
 
         foreach ($filter as $key => $value) {
             array_push($param, $value['param']);
             array_push($where, $value['query']);
         }
 
-        $where = implode(" AND ", $where);
+        $where = implode(" $andOr ", $where);
         if (strlen(trim($where)) > 0) $where = "WHERE $where";
         
 
@@ -90,9 +90,28 @@ class Conn extends PDO {
             $orderby = '';
         }
 
-        $sql = "SELECT $fields FROM $table $where $orderby $limit";
+        $sql = "SELECT $fields FROM `$table` $where $orderby $limit";
 
         return $this->getSQLArray($sql, $param);
+    }
+
+    public function fetchSimpleData($table, $options = array()) {
+        $list = array();
+        $list["filter"] = array();
+        $list["orderby"] = array();
+        $list["limit"] = false;
+        $list["andOr"] = "AND";
+        $list["fields"] = '*';
+
+        foreach ($options as $key => $value) {
+            if (isset($list[$key])) {
+                $list[$key] = $value;
+            }
+        }
+
+        $result = $this->fetchTableDataF($table, $list["filter"], $list["orderby"], $list["limit"], $list["andOr"], $list["fields"]);
+
+        return $result;
     }
 
     public function assembleFilter($values, $operator = "=") {
