@@ -58,6 +58,10 @@ class TABLE_RECORD implements Iterator {
     function getTable() {
         return $this->table;
     }
+
+    function toArray() {
+        return $this->data;
+    }
     
     function post() {
         return $this->shouldInsert()? $this->insert(): $this->update();

@@ -50,16 +50,28 @@ class Conn extends PDO {
         return $str;
     }
 
-    public function fetchTableData($table, $field = null, $value = null, $operator = "=", $orderby = array(), $invert = false, $limit = false, $fields = "*") {
+    public function fetchTableData($table, $field = null, $values = null, $operator = "=", $orderby = array(), $invert = false, $limit = false, $fields = "*") {
         $where = array();
-        if ($value !== null && $field !== '') {
-            if ($invert) {
-                $where[0]['query'] = "? $operator $field";
-            } else {
-                $where[0]['query'] = "$field $operator ?";
-            }
-            $where[0]['param'] = $value;
+
+        if (!is_array($values)) {
+            $values = array($values);
         }
+
+        foreach ($values as $i => $value) {
+            if ($value !== null && $field !== '') {
+                $filter = array();
+
+                if ($invert) {
+                    $filter['query'] = "? $operator $field";
+                } else {
+                    $filter['query'] = "$field $operator ?";
+                }
+                $filter['param'] = $value;
+
+                array_push($where, $filter);
+            }
+        }
+
         return $this->fetchTableDataF($table, $where, $orderby, $limit, $fields);
     }
 
