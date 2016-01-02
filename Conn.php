@@ -202,7 +202,7 @@ class Conn extends PDO {
 
         if (!$stmt->execute($param)) {
             $err = $stmt->errorInfo();
-            throw new Exception($err[2], $err[0]);
+            throw new Exception($err[2], (int) $err[0]);
             return false;
         }
 
