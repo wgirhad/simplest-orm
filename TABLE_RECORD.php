@@ -176,6 +176,18 @@ class TABLE_RECORD implements Iterator {
         }
     }
 
+    public static function indexResultSet($set, $indexField = "ID") {
+        $result = [];
+
+        foreach ($set as $row) {
+            $id = $row[$indexField];
+
+            $result[$id] = $row;
+        }
+
+        return $result;
+    }
+
     public static function fetchList($table, $idList, $field = "ID") {
         $result = array();
         $filter = array();
