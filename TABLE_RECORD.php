@@ -169,10 +169,10 @@ class TABLE_RECORD implements Iterator {
             array_push($result, new self($table, $row));
         }
 
-        if (count($result) == 1) {
+        if (count($result) > 0) {
             return $result[0];
         } else {
-            return $result;
+            return false;
         }
     }
 
