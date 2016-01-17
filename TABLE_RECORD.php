@@ -192,6 +192,11 @@ class TABLE_RECORD implements Iterator {
         $result = array();
         $filter = array();
 
+        // You may send a simple variable as parameter
+        if (!is_array($idList)) {
+            $idList = array($idList);
+        }
+
         foreach ($idList as $id) {
             array_push($filter, array(
                 "query"   => "$field = ?",
