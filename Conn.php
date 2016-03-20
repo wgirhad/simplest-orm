@@ -26,11 +26,13 @@
 
 class Conn extends PDO {
     private static $instance;
+    protected $dbName;
 
     function __construct() {
         $conf = json_decode(file_get_contents(__DIR__ . '/config.json'), true);
         $dsn = self::template($conf['DSN'], $conf);
         parent::__construct($dsn, $conf['user'], $conf['password']);
+        $this->dbName = $conf["db"];
         $this->exec("SET CHARACTER SET utf8");
     }
 
@@ -154,10 +156,12 @@ class Conn extends PDO {
             COLUMN_NAME,
             DATA_TYPE
         FROM INFORMATION_SCHEMA.COLUMNS
-        WHERE TABLE_NAME = ?
+        WHERE
+            TABLE_NAME = ?
+        AND TABLE_SCHEMA = ?
         ";
 
-        $array = $this->getSQLArray($sql, array($table));
+        $array = $this->getSQLArray($sql, array($table, $this->dbName));
 
         $result = array();
 
@@ -174,11 +178,12 @@ class Conn extends PDO {
             COLUMN_NAME
         FROM INFORMATION_SCHEMA.COLUMNS
         WHERE
-            UPPER(TABLE_NAME) = UPPER(?)
+            TABLE_NAME = ?
+        AND TABLE_SCHEMA = ?
         AND COLUMN_KEY =  'PRI'
         ";
 
-        $array = $this->getSQLArray($sql, array($table));
+        $array = $this->getSQLArray($sql, array($table, $this->dbName));
 
         return $array[0]["COLUMN_NAME"];
     }
