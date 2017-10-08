@@ -47,6 +47,10 @@ class TABLE_RECORD implements Iterator {
         $this->data = $data;
     }
 
+    public function __isset($key) {
+        return isset($this->data[$key]);
+    }
+
     function __set($key, $value) {
         $this->data[$key] = $value;
     }
