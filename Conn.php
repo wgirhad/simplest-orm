@@ -33,7 +33,7 @@ class Conn extends PDO {
         $dsn = self::template($conf['DSN'], $conf);
         parent::__construct($dsn, $conf['user'], $conf['password']);
         $this->dbName = $conf["db"];
-        $this->exec("SET CHARACTER SET utf8");
+        $this->exec("set character set utf8");
     }
 
     public static function getInstance() {
@@ -87,7 +87,7 @@ class Conn extends PDO {
         }
 
         $where = implode(" $andOr ", $where);
-        if (strlen(trim($where)) > 0) $where = "WHERE $where";
+        if (strlen(trim($where)) > 0) $where = "where $where";
         
 
         if ($limit !== false) {
@@ -104,7 +104,7 @@ class Conn extends PDO {
             $orderby = '';
         }
 
-        $sql = "SELECT $fields FROM `$table` $where $orderby $limit";
+        $sql = "select $fields from `$table` $where $orderby $limit";
 
         return $this->getSQLArray($sql, $param);
     }
@@ -114,7 +114,7 @@ class Conn extends PDO {
         $list["filter"] = array();
         $list["orderby"] = array();
         $list["limit"] = false;
-        $list["andOr"] = "AND";
+        $list["andOr"] = "and";
         $list["fields"] = '*';
 
         foreach ($options as $key => $value) {
@@ -131,11 +131,11 @@ class Conn extends PDO {
     public function assembleFilter($values, $operator = "=") {
         $result = array();
 
-        $isContaining = ($operator == "CONTAINING");
+        $isContaining = ($operator == "containing");
 
         foreach ($values as $key => $value) {
             if ($isContaining) {
-                $op = "LIKE";
+                $op = "like";
                 $value = "%$value%";
             } else {
                 $op = $operator;
@@ -152,13 +152,13 @@ class Conn extends PDO {
 
     public function fetchTableMeta($table) {
         $sql =
-        "SELECT
-            COLUMN_NAME,
-            DATA_TYPE
-        FROM INFORMATION_SCHEMA.COLUMNS
-        WHERE
-            TABLE_NAME = ?
-        AND TABLE_SCHEMA = ?
+        "select
+            column_name,
+            data_type
+        from information_schema.columns
+        where
+            table_name = ?
+        and table_schema = ?
         ";
 
         $array = $this->getSQLArray($sql, array($table, $this->dbName));
@@ -166,7 +166,7 @@ class Conn extends PDO {
         $result = array();
 
         foreach ($array as $value) {
-            $result[$value['COLUMN_NAME']] = $value['DATA_TYPE'];
+            $result[$value['column_name']] = $value['data_type'];
         }
 
         return $result;
@@ -174,18 +174,18 @@ class Conn extends PDO {
 
     public function fetchTablePK($table) {
         $sql =
-        "SELECT DISTINCT
-            COLUMN_NAME
-        FROM INFORMATION_SCHEMA.COLUMNS
-        WHERE
-            TABLE_NAME = ?
-        AND TABLE_SCHEMA = ?
-        AND COLUMN_KEY =  'PRI'
+        "select distinct
+            column_name
+        from information_schema.columns
+        where
+            table_name = ?
+        and table_schema = ?
+        and column_key = 'PRI'
         ";
 
         $array = $this->getSQLArray($sql, array($table, $this->dbName));
 
-        return $array[0]["COLUMN_NAME"];
+        return $array[0]["column_name"];
     }
 
     public function getSQLArray($sql, $param = array()) {

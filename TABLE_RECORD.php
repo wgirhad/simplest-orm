@@ -24,7 +24,7 @@
  * THE SOFTWARE.
  */
 
-class TABLE_RECORD implements Iterator {
+class TableRecord implements Iterator {
     protected $data;
     protected $columns;
     protected $primaryKey;
@@ -114,7 +114,7 @@ class TABLE_RECORD implements Iterator {
 
     protected function assembleDeleteQuery() {
         $param = array($this->data[$this->primaryKey]);
-        $sql = "DELETE FROM $this->table WHERE $this->primaryKey = ?";
+        $sql = "delete from $this->table where $this->primaryKey = ?";
 
         return array($sql, $param);
     }
@@ -126,7 +126,7 @@ class TABLE_RECORD implements Iterator {
         $values = trim(str_repeat('?,', count($param)), ',');
         $into = implode(', ', $into);
 
-        $sql = "INSERT INTO $this->table($into) VALUES($values)";
+        $sql = "insert into $this->table($into) values($values)";
 
         return array($sql, $param);
     }
@@ -143,7 +143,7 @@ class TABLE_RECORD implements Iterator {
 
         array_push($param, $this->data[$this->primaryKey]);
 
-        $sql = "UPDATE $this->table SET $set WHERE $this->primaryKey = ?";
+        $sql = "update $this->table set $set where $this->primaryKey = ?";
 
         return array($sql, $param);
     }
@@ -164,7 +164,7 @@ class TABLE_RECORD implements Iterator {
         $this->data = array_intersect_key($this->data, $this->columns);
     }
 
-    public static function fetch($table, $idValue, $field = "ID") {
+    public static function fetch($table, $idValue, $field = "id") {
         $result = array();
 
         $rows = Conn::getInstance()->fetchTableData($table, $field, $idValue);
@@ -180,7 +180,7 @@ class TABLE_RECORD implements Iterator {
         }
     }
 
-    public static function indexResultSet($set, $indexField = "ID") {
+    public static function indexResultSet($set, $indexField = "id") {
         $result = [];
 
         foreach ($set as $row) {
@@ -192,7 +192,7 @@ class TABLE_RECORD implements Iterator {
         return $result;
     }
 
-    public static function fetchList($table, $idList, $field = "ID") {
+    public static function fetchList($table, $idList, $field = "id") {
         $result = array();
         $filter = array();
 
@@ -209,7 +209,7 @@ class TABLE_RECORD implements Iterator {
         }
 
         $rows = Conn::getInstance()->fetchSimpleData($table, array(
-            "andOr"   => "OR",
+            "andOr"   => "or",
             "orderby" => [$field],
             "filter"  => $filter
         ));
@@ -244,3 +244,6 @@ class TABLE_RECORD implements Iterator {
         return key($this->data) !== null;
     }
 }
+
+// compatibility
+class TABLE_RECORD extends TableRecord {}
